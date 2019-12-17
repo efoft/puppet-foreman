@@ -13,7 +13,15 @@ class foreman::puppet inherits foreman{
     require => Package['puppetserver'],
   }
 
-  # r10k
+  # Gems
+  # -----------------------------------------------------------------------
+  $gem_install_exec_defaults = {
+    path    => $::path,
+    require => Package['puppetserver'],
+    notify  => Service['puppetserver'],
+  }
+
+  # gem: r10k
   # -----------------------------------------------------------------------
   if $r10k {
     package { 'r10k':
@@ -39,20 +47,21 @@ class foreman::puppet inherits foreman{
     }
   }
 
-  # hiera-eyaml
+  # gem: hiera-eyaml
   # -----------------------------------------------------------------------
   if $eyaml {
     package { 'hiera-eyaml':
       ensure          => installed,
       provider        => puppet_gem,
       install_options => [ '--no-document' ],
+      notify          => Service['puppetserver'],
     }
 
-    exec { 'install hiera-eyaml as puppetserver gem':
-      command => '/opt/puppetlabs/bin/puppetserver gem install hiera-eyaml  --no-document',
-      path    => $::path,
-      unless  => '/opt/puppetlabs/bin/puppetserver gem list | grep hiera-eyaml',
-      require => Package['puppetserver'],
+    exec {
+      default: * => $gem_install_exec_defaults;
+      'install hiera-eyaml as puppetserver gem':
+        command => '/opt/puppetlabs/bin/puppetserver gem install hiera-eyaml  --no-document',
+        unless  => '/opt/puppetlabs/bin/puppetserver gem list | grep hiera-eyaml';
     }
 
     $eyaml_keys = [
@@ -88,8 +97,33 @@ class foreman::puppet inherits foreman{
     }
   }
 
-  # Vault (TODO)
+  # gem: vault (using https://github.com/petems/petems-hiera_vault)
   # -----------------------------------------------------------------------
+  if $vault {
+    package { ['vault','debouncer']:
+      ensure          => installed,
+      provider        => puppet_gem,
+      install_options => [ '--no-document' ],
+      notify          => Service['puppetserver'],
+    }
+
+    exec {
+      default: * => $gem_install_exec_defaults;
+      'install vault as puppetserver gem':
+        command => '/opt/puppetlabs/bin/puppetserver gem install vault  --no-document',
+        unless  => '/opt/puppetlabs/bin/puppetserver gem list | grep vault';
+      'install debouncer as puppetserver gem':
+        command => '/opt/puppetlabs/bin/puppetserver gem install debouncer  --no-document',
+        unless  => '/opt/puppetlabs/bin/puppetserver gem list | grep debouncer';
+    }
+
+    exec { 'install petems/hiera_vault module':
+      command => 'puppet module install petems/hiera_vault -i /etc/puppetlabs/code/modules/',
+      path    => [$::path, '/opt/puppetlabs/bin'],
+      creates => '/etc/puppetlabs/code/modules/hiera_vault',
+      require => Package['puppet-agent'],
+    }
+  }
   
   # PuppetDB
   # -----------------------------------------------------------------------
@@ -100,12 +134,14 @@ class foreman::puppet inherits foreman{
       command => 'puppet module install puppetlabs-stdlib --version 5.2.0 -i /etc/puppetlabs/code/modules/',
       path    => [$::path, '/opt/puppetlabs/bin'],
       creates => '/etc/puppetlabs/code/modules/stdlib',
+      require => Package['puppet-agent'],
     }
 
     exec { 'install puppetdb module':
       command => 'puppet module install puppetlabs-puppetdb -i /etc/puppetlabs/code/modules',
       path    => [$::path, '/opt/puppetlabs/bin'],
       creates => '/etc/puppetlabs/code/modules/puppetdb',
+      require => Package['puppet-agent'],
     }
 
     class { 'puppetdb':
