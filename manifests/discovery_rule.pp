@@ -3,6 +3,7 @@ define foreman::discovery_rule (
   String  $rule          = $title,
   Boolean $enabled       = true,
   String  $hostgroup,
+  String  $hostname,
   Integer $priority,
   String  $search,
   Array   $organizations = [],
@@ -26,7 +27,7 @@ define foreman::discovery_rule (
   }
 
   exec { "Create config group ${rule}" :
-    command     => "hammer discovery-rule create --name ${rule} --enabled ${enabled} --priority ${priority} --hostgroup ${hostgroup} ${org} ${loc}",
+    command     => "hammer discovery-rule create --name ${rule} --enabled ${enabled} --priority ${priority} --hostgroup ${hostgroup} --search \"${search}\" --hostname \"${hostname}\" ${org} ${loc}",
     path        => $::path,
     environment => ['HOME=/root'],
     unless      => "hammer discovery-rule info --name ${rule}",
