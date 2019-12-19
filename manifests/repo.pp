@@ -19,7 +19,7 @@ define foreman::repo (
   }
 
   exec { "Sync repo ${repo} for product ${product} in ${org}":
-    command     => "hammer repository synchronize --organization \"${org}\" --product \"${product}\" --async",
+    command     => "hammer repository synchronize --organization \"${org}\" --product \"${product}\" --name \"${repo}\" --async",
     path        => $::path,
     environment => ['HOME=/root'],
     refreshonly => true,

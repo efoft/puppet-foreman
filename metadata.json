@@ -1,6 +1,6 @@
 {
         "name": "efoft-foreman",
-        "version": "0.0.1",
+        "version": "0.0.2",
         "author": "efoft",
         "license": "Apache-2.0",
         "source": "https://github.com/efoft/puppet-foreman.git",
