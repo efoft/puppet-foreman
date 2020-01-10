@@ -100,22 +100,34 @@ class foreman::puppet inherits foreman{
   # gem: vault (using https://github.com/petems/petems-hiera_vault)
   # -----------------------------------------------------------------------
   if $vault {
-    package { ['vault','debouncer']:
-      ensure          => installed,
-      provider        => puppet_gem,
+    package { 'vault-puppetserver-gem':
+      ensure          => 'present',
+      name            => 'vault',
+      provider        => 'puppetserver_gem',
       install_options => [ '--no-document' ],
-      notify          => Service['puppetserver'],
     }
-
-    exec {
-      default: * => $gem_install_exec_defaults;
-      'install vault as puppetserver gem':
-        command => '/opt/puppetlabs/bin/puppetserver gem install vault  --no-document',
-        unless  => '/opt/puppetlabs/bin/puppetserver gem list | grep vault';
-      'install debouncer as puppetserver gem':
-        command => '/opt/puppetlabs/bin/puppetserver gem install debouncer  --no-document',
-        unless  => '/opt/puppetlabs/bin/puppetserver gem list | grep debouncer';
+    ->
+    package { 'vault-puppetpath-gem':
+      ensure          => 'present',
+      name            => 'vault',
+      provider        => 'puppet_gem',
+      install_options => [ '--no-document' ],
     }
+    ->
+    package { 'debouncer-puppetserver-gem':
+      ensure          => 'present',
+      name            => 'debouncer',
+      provider        => 'puppetserver_gem',
+      install_options => [ '--no-document' ],
+    }
+    ->
+    package { 'debouncer-puppetpath-gem':
+      ensure          => 'present',
+      name            => 'debouncer',
+      provider        => 'puppet_gem',
+      install_options => [ '--no-document' ],
+    }
+    ~> Service['puppetserver']
 
     exec { 'install petems/hiera_vault module':
       command => 'puppet module install petems/hiera_vault -i /etc/puppetlabs/code/modules/',
