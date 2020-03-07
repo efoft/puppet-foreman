@@ -140,27 +140,9 @@ class foreman::puppet inherits foreman{
   # PuppetDB
   # -----------------------------------------------------------------------
   if $puppetdb {
-    ## At the time being puppetdb module pulls stdlib 6.0 as a dependency 
-    ## which turns not compatible with some other modules (like puppet-gitlab)
-    exec { 'install stdlib 5.2.0 module':
-      command => 'puppet module install puppetlabs-stdlib --version 5.2.0 -i /etc/puppetlabs/code/modules/',
-      path    => [$::path, '/opt/puppetlabs/bin'],
-      creates => '/etc/puppetlabs/code/modules/stdlib',
-      require => Package['puppet-agent'],
-    }
+    include puppetdb
+    include puppetdb::master::config
 
-    exec { 'install puppetdb module':
-      command => 'puppet module install puppetlabs-puppetdb -i /etc/puppetlabs/code/modules',
-      path    => [$::path, '/opt/puppetlabs/bin'],
-      creates => '/etc/puppetlabs/code/modules/puppetdb',
-      require => Package['puppet-agent'],
-    }
-
-    class { 'puppetdb':
-      require => Exec['install stdlib 5.2.0 module','install puppetdb module'],
-    }->
-    class { 'puppetdb::master::config':
-      notify  => Service['puppetserver'],
-    }
+    Class['puppetdb'] -> Class['puppetdb::master::config'] ~> Service['puppetserver']
   }
 }
