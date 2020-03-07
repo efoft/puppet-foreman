@@ -75,7 +75,7 @@ class foreman::puppet inherits foreman{
         owner   => 'puppet',
         group   => 'puppet',
         mode    => '0500',
-        require => Package['puppetserver','puppet-agent'];
+        require => Package['puppetserver'];
       '/root/.eyaml':
         ensure  => directory;
       '/root/.eyaml/config.yaml':
@@ -93,7 +93,7 @@ class foreman::puppet inherits foreman{
       path    => [$::path, '/opt/puppetlabs/puppet/bin'],
       creates => $eyaml_keys,
       before  => File[$eyaml_keys],
-      require => Package['hiera-eyaml'],
+      require => [Package['hiera-eyaml'],File['/root/.eyaml/config.yaml']],
     }
   }
 
@@ -143,6 +143,16 @@ class foreman::puppet inherits foreman{
     include puppetdb
     include puppetdb::master::config
 
-    Class['puppetdb'] -> Class['puppetdb::master::config'] ~> Service['puppetserver']
+    ## PuppetDB fails to start is there's no ssl files in /etc/puppetlabs/puppet/ssl.
+    ## These file are generated upon puppetserver start.
+    ## We have to use exec instead of regular resource ordering because such ordering
+    ## lead to dependency cycle due to the logic in puppetlabs-puppetdb code.
+    exec { 'start puppetserver before puppetdb':
+      command => 'systemctl start puppetserver',
+      path    => $::path,
+      unless  => 'systemctl is-active puppetserver',
+      require => Package['puppetserver'],
+      before  => Class['puppetdb'],
+    }
   }
 }
