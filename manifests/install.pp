@@ -82,10 +82,9 @@ class foreman::install inherits foreman{
   exec { 'install foreman':
     command => $foreman_installer_cmd,
     path    => $::path,
-    unless  => 'passenger-memory-stats | grep "/usr/share/foreman"',
+    unless  => '( which passenger-memory-stats 2>&1>/dev/null && passenger-memory-stats ) | grep "/usr/share/foreman"',
     notify  => Exec['wait 60 sec before foreman is stabilized'],
     timeout => 0,
-    noop    => true, # TODO: remove
   }
 
   exec { 'wait 60 sec before foreman is stabilized':
