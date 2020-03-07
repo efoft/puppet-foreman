@@ -1,6 +1,13 @@
 #
 class foreman::install inherits foreman{
 
+  # Foreman requires to resolve forward DNS for this host
+  # ------------------------------------------------------------------------
+  host { $::fqdn:
+    host_aliases => $::hostname,
+    ip           => $::ipaddress,
+  }
+
   # Foreman installer packages
   # ------------------------------------------------------------------------
   $packages = $katello ?
