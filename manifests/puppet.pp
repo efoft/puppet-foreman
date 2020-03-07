@@ -37,7 +37,7 @@ class foreman::puppet inherits foreman{
 
     file { '/etc/puppetlabs/r10k/r10k.yaml':
       ensure  => file,
-      content => template('profile/foreman/r10k.yaml.erb'),
+      content => template('foreman/r10k.yaml.erb'),
     }
 
     if empty($control_repo_url) {
@@ -80,7 +80,7 @@ class foreman::puppet inherits foreman{
         ensure  => directory;
       '/root/.eyaml/config.yaml':
         ensure  => file,
-        source  => 'puppet:///modules/profile/foreman/eyaml_config.yaml';
+        source  => 'puppet:///modules/foreman/eyaml_config.yaml';
       $eyaml_keys:
         ensure  => file,
         owner   => 'puppet',
