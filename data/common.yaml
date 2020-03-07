@@ -2,4 +2,4 @@
 foreman::foreman_release: '1.24'
 foreman::puppet_release:  '6'
 foreman::katello_release: '3.14'
-foreman::password:        'password'
+#foreman::password:        'password'
