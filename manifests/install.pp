@@ -1,11 +1,12 @@
 #
-class foreman::install inherits foreman{
+class foreman::install inherits foreman {
 
   # Foreman requires to resolve forward DNS for this host
   # ------------------------------------------------------------------------
   host { $::fqdn:
     host_aliases => $::hostname,
     ip           => $::ipaddress,
+    before       => Exec['install foreman'],
   }
 
   # Foreman installer packages
