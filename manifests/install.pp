@@ -87,11 +87,12 @@ class foreman::install inherits foreman{
   $foreman_installer_cmd = "foreman-installer ${scenario} --foreman-initial-admin-password=\"${password}\" ${compute_options} ${puppetdb_options} ${discovery_options} ${bmc_options} ${remote_execution_ssh_options}"
 
   exec { 'install foreman':
-    command => $foreman_installer_cmd,
-    path    => $::path,
-    unless  => '( which passenger-memory-stats 2>&1>/dev/null && passenger-memory-stats ) | grep "/usr/share/foreman"',
-    notify  => Exec['wait 60 sec before foreman is stabilized'],
-    timeout => 0,
+    command  => $foreman_installer_cmd,
+    path     => $::path,
+    unless   => '( which passenger-memory-stats 2>&1>/dev/null && passenger-memory-stats ) | grep "/usr/share/foreman"',
+    provider => 'shell',
+    notify   => Exec['wait 60 sec before foreman is stabilized'],
+    timeout  => 0,
   }
 
   exec { 'wait 60 sec before foreman is stabilized':
