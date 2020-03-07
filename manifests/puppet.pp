@@ -90,7 +90,7 @@ class foreman::puppet inherits foreman{
 
     exec { 'create eyaml keys':
       command => 'eyaml createkeys',
-      path    => $::path,
+      path    => [$::path, '/opt/puppetlabs/puppet/bin'],
       creates => $eyaml_keys,
       before  => File[$eyaml_keys],
       require => Package['hiera-eyaml'],
