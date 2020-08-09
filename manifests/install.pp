@@ -113,7 +113,7 @@ class foreman::install inherits foreman {
 
   # Foreman installer run
   # ------------------------------------------------------------------------
-  $foreman_installer_cmd = "foreman-installer ${scenario} --foreman-initial-admin-password=\"${password}\" ${compute_options} ${puppetdb_options} ${foreman_db_options}"
+  $foreman_installer_cmd = "foreman-installer ${scenario} --foreman-initial-admin-password=\"${password}\" ${puppetdb_options} ${foreman_db_options} ${options}"
 
   notify { "command: ${foreman_installer_cmd}": loglevel => warning }
 

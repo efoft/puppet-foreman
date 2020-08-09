@@ -57,18 +57,19 @@ class foreman::puppet inherits foreman{
   # gem: hiera-eyaml
   # -----------------------------------------------------------------------
   if $eyaml {
-    package { 'hiera-eyaml':
+
+    package { 'hiera-eyaml-puppetpath-gem':
+      ensure          => 'present',
+      name            => 'hiera-eyaml',
+      provider        => 'puppetserver_gem',
+      install_options => [ '--no-document' ],
+    }
+
+    -> package { 'hiera-eyaml':
       ensure          => installed,
       provider        => puppet_gem,
       install_options => [ '--no-document' ],
       notify          => Service['puppetserver'],
-    }
-
-    exec {
-      default: * => $gem_install_exec_defaults;
-      'install hiera-eyaml as puppetserver gem':
-        command => '/opt/puppetlabs/bin/puppetserver gem install hiera-eyaml  --no-document',
-        unless  => '/opt/puppetlabs/bin/puppetserver gem list | grep hiera-eyaml';
     }
 
     $eyaml_keys = [
@@ -107,6 +108,7 @@ class foreman::puppet inherits foreman{
   # gem: vault (using https://github.com/petems/petems-hiera_vault)
   # -----------------------------------------------------------------------
   if $vault {
+
     package { 'vault-puppetserver-gem':
       ensure          => 'present',
       name            => 'vault',
