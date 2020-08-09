@@ -1,6 +1,12 @@
 #
 class foreman::repos inherits foreman {
 
+  $puppet_release  = $foreman::puppet_release
+  $foreman_release = $foreman::foreman_release
+
+  $katello         = $foreman::katello
+  $katello_release = $foreman::katello_release
+
   # EPEL (epel-release package is in built-in extras repository)
   exec { 'install epel-release for foreman':
     command => 'yum -y install epel-release',
@@ -23,7 +29,7 @@ class foreman::repos inherits foreman {
   exec { 'yum install foreman-release':
     command => "yum -y --nogpgcheck install ${foreman_rpm}",
     path    => $::path,
-    unless  => "rpm -q foreman-release",
+    unless  => 'rpm -q foreman-release',
   }
 
   # Katello
@@ -33,7 +39,7 @@ class foreman::repos inherits foreman {
     exec { 'yum install katello-repos':
       command => "yum -y --nogpgcheck install ${katello_rpm}",
       path    => $::path,
-      unless  => "rpm -q katello-repos",
+      unless  => 'rpm -q katello-repos',
     }
   }
 }

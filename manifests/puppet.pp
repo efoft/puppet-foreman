@@ -1,16 +1,23 @@
 #
 class foreman::puppet inherits foreman{
 
+  $r10k             = $foreman::r10k
+  $control_repo_url = $foreman::control_repo_url
+  $eyaml            = $foreman::eyaml
+  $vault            = $foreman::vault
+  $puppetdb         = $foreman::puppetdb
+  $puppetdb_server  = $foreman::puppetdb_server
+  $puppetdb_port    = $foreman::puppetdb_port
+
   # Puppetserver
   # -----------------------------------------------------------------------
   package { ['puppetserver','puppet-agent','puppet-bolt']:
     ensure => installed,
   }
 
-  service { 'puppetserver':
-    ensure  => running,
-    enable  => true,
-    require => Package['puppetserver'],
+  -> service { 'puppetserver':
+    ensure => running,
+    enable => true,
   }
 
   # Gems
@@ -79,13 +86,13 @@ class foreman::puppet inherits foreman{
       '/root/.eyaml':
         ensure  => directory;
       '/root/.eyaml/config.yaml':
-        ensure  => file,
-        source  => 'puppet:///modules/foreman/eyaml_config.yaml';
+        ensure => file,
+        source => 'puppet:///modules/foreman/eyaml_config.yaml';
       $eyaml_keys:
-        ensure  => file,
-        owner   => 'puppet',
-        group   => 'puppet',
-        mode    => '0400';
+        ensure => file,
+        owner  => 'puppet',
+        group  => 'puppet',
+        mode   => '0400';
     }
 
     exec { 'create eyaml keys':
@@ -106,22 +113,22 @@ class foreman::puppet inherits foreman{
       provider        => 'puppetserver_gem',
       install_options => [ '--no-document' ],
     }
-    ->
-    package { 'vault-puppetpath-gem':
+
+    -> package { 'vault-puppetpath-gem':
       ensure          => 'present',
       name            => 'vault',
       provider        => 'puppet_gem',
       install_options => [ '--no-document' ],
     }
-    ->
-    package { 'debouncer-puppetserver-gem':
+
+    -> package { 'debouncer-puppetserver-gem':
       ensure          => 'present',
       name            => 'debouncer',
       provider        => 'puppetserver_gem',
       install_options => [ '--no-document' ],
     }
-    ->
-    package { 'debouncer-puppetpath-gem':
+
+    -> package { 'debouncer-puppetpath-gem':
       ensure          => 'present',
       name            => 'debouncer',
       provider        => 'puppet_gem',
@@ -136,23 +143,30 @@ class foreman::puppet inherits foreman{
       require => Package['puppet-agent'],
     }
   }
-  
+
   # PuppetDB
   # -----------------------------------------------------------------------
   if $puppetdb {
-    include puppetdb
-    include puppetdb::master::config
+    class {'puppetdb::master::config':
+      puppetdb_server => $puppetdb_server,
+      puppetdb_port   => $puppetdb_port,
+    }
 
-    ## PuppetDB fails to start is there's no ssl files in /etc/puppetlabs/puppet/ssl.
-    ## These file are generated upon puppetserver start.
-    ## We have to use exec instead of regular resource ordering because such ordering
-    ## lead to dependency cycle due to the logic in puppetlabs-puppetdb code.
-    exec { 'start puppetserver before puppetdb':
-      command => 'systemctl start puppetserver',
-      path    => $::path,
-      unless  => 'systemctl is-active puppetserver',
-      require => Package['puppetserver'],
-      before  => Class['puppetdb'],
+    ## In case PuppetDB is installed on the same host as puppet server...
+    if defined(Class['puppetdb']) {
+
+      ## PuppetDB fails to start if there's no ssl files in /etc/puppetlabs/puppet/ssl.
+      ## These file are generated upon puppetserver start.
+      ## We have to use exec instead of regular resource ordering because such ordering
+      ## lead to dependency cycle due to the logic in puppetlabs-puppetdb code.
+
+      exec { 'start puppetserver before puppetdb':
+        command => 'systemctl start puppetserver',
+        path    => $::path,
+        unless  => 'systemctl is-active puppetserver',
+        require => Package['puppetserver'],
+        before  => Class['puppetdb'],
+      }
     }
   }
 }
