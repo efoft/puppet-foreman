@@ -1,5 +1,26 @@
 ---
-foreman::foreman_release: '2.1'
-foreman::puppet_release:  '6'
-foreman::katello_release: '3.15'
 #foreman::password:        'password'
+foreman::puppet_release:  '6'
+foreman::foreman_release: '2.1'
+
+foreman::katello: false
+foreman::katello_release: '3.15'
+foreman::puppetdb: true
+#foreman::puppetdb_host: puppedb.example.com
+#foreman::puppetdb_port: 8081
+
+#foreman::postgres_version: '9.6'
+#foreman::foreman_db_host: dbhost.example.com
+#foreman::foreman_db_port: 5000
+#foreman::foreman_db_database: 'foreman'
+#foreman::foreman_db_username: 'foreman'
+#foreman::foreman_db_password: 'mypassword'
+
+foreman::r10k: true
+#foreman::control_repo_url: 'https://github.com/puppetlabs/control-repo'
+foreman::eyaml: true
+foreman::vault: false
+
+foreman::manage_hosts_entry: true
+#foreman::override_options: []
+

@@ -6,7 +6,7 @@ class foreman::puppet inherits foreman{
   $eyaml            = $foreman::eyaml
   $vault            = $foreman::vault
   $puppetdb         = $foreman::puppetdb
-  $puppetdb_server  = $foreman::puppetdb_server
+  $puppetdb_host    = $foreman::puppetdb_host
   $puppetdb_port    = $foreman::puppetdb_port
 
   # Puppetserver
@@ -149,9 +149,12 @@ class foreman::puppet inherits foreman{
   # PuppetDB
   # -----------------------------------------------------------------------
   if $puppetdb {
+    $puppetdb_disable_ssl = ($puppetdb_port == 8080)
+
     class {'puppetdb::master::config':
-      puppetdb_server => $puppetdb_server,
-      puppetdb_port   => $puppetdb_port,
+      puppetdb_server      => $puppetdb_host,
+      puppetdb_port        => $puppetdb_port,
+      puppetdb_disable_ssl => $puppetdb_disable_ssl,
     }
 
     ## In case PuppetDB is installed on the same host as puppet server...

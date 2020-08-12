@@ -1,28 +1,31 @@
 #
 class foreman::install inherits foreman {
 
+  $password            = $foreman::password
+
   $katello             = $foreman::katello
 
   $puppetdb            = $foreman::puppetdb
-  $puppetdb_server     = $foreman::puppetdb_server
+  $puppetdb_host       = $foreman::puppetdb_host
   $puppetdb_port       = $foreman::puppetdb_port
 
   $postgres_version    = $foreman::postgres_version
 
   $foreman_db_host     = $foreman::foreman_db_host
+  $foreman_db_port     = $foreman::foreman_db_port
   $foreman_db_database = $foreman::foreman_db_database
   $foreman_db_username = $foreman::foreman_db_username
   $foreman_db_password = $foreman::foreman_db_password
 
   $override_options    = $foreman::override_options
 
-  $puppetdb_server_real = $puppetdb_server ?
+  $puppetdb_host_real = $puppetdb_host ?
   {
     undef   => $::fqdn,
-    default => $puppetdb_server
+    default => $puppetdb_host
   }
 
-  $puppetdb_port_real   = $puppetdb_port ?
+  $puppetdb_port_real = $puppetdb_port ?
   {
     undef   => 8081,
     default => $puppetdb_port
@@ -35,7 +38,13 @@ class foreman::install inherits foreman {
     default => 'https'
   }
 
-  $puppetdb_address = "${puppetdb_schema}://${puppetdb_server_real}:${puppetdb_port_real}/pdb/cmd/v1"
+  $puppetdb_address = "${puppetdb_schema}://${puppetdb_host_real}:${puppetdb_port_real}/pdb/cmd/v1"
+
+  $foreman_db_port_real = $foreman_db_port ?
+  {
+    undef   => 5432,
+    default => $foreman_db_port
+  }
 
   $db_is_local = (($foreman_db_host == undef) or ($foreman_db_host == 'localhost') or ($foreman_db_host == '127.0.0.1'))
 
@@ -98,10 +107,11 @@ class foreman::install inherits foreman {
     true  => '',
     false => @("END")
     --foreman-db-manage=false \
-    --foreman-db-host=$foreman_db_host \
-    --foreman-db-database=$foreman_db_database \
-    --foreman-db-username=$foreman_db_username \
-    --foreman-db-password=$foreman_db_password
+    --foreman-db-host=${foreman_db_host} \
+    --foreman-db-port=${foreman_db_port_real} \
+    --foreman-db-database=${foreman_db_database} \
+    --foreman-db-username=${foreman_db_username} \
+    --foreman-db-password=${foreman_db_password}
     | END
   }
 
@@ -113,17 +123,15 @@ class foreman::install inherits foreman {
 
   # Foreman installer run
   # ------------------------------------------------------------------------
-  $foreman_installer_cmd = "foreman-installer ${scenario} --foreman-initial-admin-password=\"${password}\" ${puppetdb_options} ${foreman_db_options} ${options}"
+  ## -v is to workaround the issue https://projects.theforeman.org/issues/25516, https://bugzilla.redhat.com/show_bug.cgi?id=1537632
+  $foreman_installer_cmd = strip("foreman-installer -v ${scenario} --foreman-initial-admin-password=\"${password}\" ${puppetdb_options} ${foreman_db_options} ${options}")
 
-  notify { "command: ${foreman_installer_cmd}": loglevel => warning }
-
-  #exec { 'install foreman':
-  #  command  => $foreman_installer_cmd,
-  #  path     => $::path,
-  #  unless   => '( which passenger-memory-stats 2>&1>/dev/null && passenger-memory-stats ) | grep "/usr/share/foreman"',
-  #  provider => 'shell',
-  #  timeout  => 0,
-  #}
+  exec { 'install foreman':
+    command  => $foreman_installer_cmd,
+    path     => $::path,
+    provider => 'shell',
+    timeout  => 0,
+  }
 
   ~> exec { 'wait 60 sec before foreman is stabilized':
     command     => 'sleep 60',
@@ -134,7 +142,7 @@ class foreman::install inherits foreman {
 
   # Fix access to PuppetDB certs
   # ------------------------------------------------------------------------
-  if $puppetdb and ($puppetdb_server in ['localhost', '127.0.0.1', $::hostname, $::fqdn]) {
+  if $puppetdb and ($puppetdb_host_real in ['localhost', '127.0.0.1', $::hostname, $::fqdn]) {
     user { 'foreman':
       ensure  => present,
       groups  => 'puppet',

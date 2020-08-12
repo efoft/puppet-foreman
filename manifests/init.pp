@@ -9,6 +9,7 @@
 # @param puppetdb_port       Specify if PuppetDB resides not on this host.
 # @param postgres_version    Version to be set in custom-install.yml of foreman-installer. But doen't manage PostreSQL repos!
 # @param foreman_db_host     Specify only if PostgreSQL db is on external host and not managed by this manifest.
+# @param foreman_db_port     Specify only if PostgreSQL db is on external host and not managed by this manifest.
 # @param foreman_db_database Specify only if PostgreSQL db is on external host and not managed by this manifest.
 # @param foreman_db_username Specify only if PostgreSQL db is on external host and not managed by this manifest.
 # @param foreman_db_password Specify only if PostgreSQL db is on external host and not managed by this manifest.
@@ -26,8 +27,8 @@ class foreman (
   String                 $puppet_release,
   String                 $foreman_release,
   # Katello
-  Boolean                $katello             = true,
   String                 $katello_release,
+  Boolean                $katello             = true,
   # PuppetDB
   Boolean                $puppetdb            = true,
   Optional[Stdlib::Host] $puppetdb_host       = undef,
@@ -35,6 +36,7 @@ class foreman (
   # PostgreSQL
   Optional[String[1]]    $postgres_version    = undef,
   Optional[Stdlib::Host] $foreman_db_host     = undef,
+  Optional[Stdlib::Port] $foreman_db_port     = undef,
   Optional[String[1]]    $foreman_db_database = undef,
   Optional[String[1]]    $foreman_db_username = undef,
   Optional[String[1]]    $foreman_db_password = undef,
