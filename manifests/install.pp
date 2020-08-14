@@ -111,8 +111,8 @@ class foreman::install inherits foreman {
     --foreman-db-port=${foreman_db_port_real} \
     --foreman-db-database=${foreman_db_database} \
     --foreman-db-username=${foreman_db_username} \
-    --foreman-db-password=${foreman_db_password}
-    | END
+    --foreman-db-password="${foreman_db_password}"
+    |- END
   }
 
   $options = ! empty($override_options) ?
@@ -121,16 +121,19 @@ class foreman::install inherits foreman {
     false => '',
   }
 
+  $installer_options = join([$puppetdb_options, $foreman_db_options, $options], ' ')
+
   # Foreman installer run
   # ------------------------------------------------------------------------
-  ## -v is to workaround the issue https://projects.theforeman.org/issues/25516, https://bugzilla.redhat.com/show_bug.cgi?id=1537632
-  $foreman_installer_cmd = strip("foreman-installer -v ${scenario} --foreman-initial-admin-password=\"${password}\" ${puppetdb_options} ${foreman_db_options} ${options}")
+  ## LC_ALL is a workaround for the issues https://projects.theforeman.org/issues/25516, https://bugzilla.redhat.com/show_bug.cgi?id=1537632
+  $foreman_installer_cmd = strip("foreman-installer -v ${scenario} --foreman-initial-admin-password=\"${password}\" ${installer_options}")
 
   exec { 'install foreman':
-    command  => $foreman_installer_cmd,
-    path     => $::path,
-    provider => 'shell',
-    timeout  => 0,
+    command     => $foreman_installer_cmd,
+    environment => ['LC_ALL=en_US.utf8'],
+    path        => $::path,
+    provider    => 'shell',
+    timeout     => 0,
   }
 
   ~> exec { 'wait 60 sec before foreman is stabilized':
