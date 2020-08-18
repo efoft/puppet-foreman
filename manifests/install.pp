@@ -127,6 +127,7 @@ class foreman::install inherits foreman {
   # ------------------------------------------------------------------------
   ## LC_ALL is a workaround for the issues https://projects.theforeman.org/issues/25516, https://bugzilla.redhat.com/show_bug.cgi?id=1537632
   $foreman_installer_cmd = strip("foreman-installer -v ${scenario} --foreman-initial-admin-password=\"${password}\" ${installer_options}")
+  $foreman_installer_md5 = md5($foreman_installer_cmd)
 
   exec { 'install foreman':
     command     => $foreman_installer_cmd,
@@ -134,6 +135,14 @@ class foreman::install inherits foreman {
     path        => $::path,
     provider    => 'shell',
     timeout     => 0,
+    unless      => "grep ${foreman_installer_md5} /etc/foreman-installer/.foreman-installer.status",
+  }
+
+  ~> exec { 'set foreman-installer status':
+    command     => "echo -n ${foreman_installer_md5} > /etc/foreman-installer/.foreman-installer.status",
+    path        => $::path,
+    refreshonly => true,
+    provider    => 'shell',
   }
 
   ~> exec { 'wait 60 sec before foreman is stabilized':
