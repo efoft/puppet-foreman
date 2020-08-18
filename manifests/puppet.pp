@@ -157,6 +157,9 @@ class foreman::puppet inherits foreman{
       puppetdb_disable_ssl => $puppetdb_disable_ssl,
     }
 
+    Ini_setting['puppet.conf/master/storeconfigs'] ~> Service['puppetserver']
+
+
     ## In case PuppetDB is installed on the same host as puppet server...
     if defined(Class['puppetdb']) {
 
