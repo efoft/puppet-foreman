@@ -1,6 +1,7 @@
 Puppet-foreman module
 -------------
-####Description
+#### Description
+
 This module is intended to automate The Foreman installation on CentOS systems. What is does?
 
 - Disables SELinux
@@ -20,7 +21,7 @@ You can also specify via module options to use existing PostgreSQL instance inst
 The file `data/values.yaml` is the main place to toggle module params.
 The file `data/matrix.yaml` describes versions of Puppet, Katello and repos depending of the requested Foreman release.
 
-####Installation steps
+#### Installation steps
                 
 1. Fresh install of CentOS (Version 7 is tested).
 
