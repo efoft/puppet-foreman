@@ -1,34 +1,40 @@
 {
-        "name": "efoft-foreman",
-        "version": "0.1.1",
-        "author": "efoft",
-        "license": "Apache-2.0",
-        "source": "https://github.com/efoft/puppet-foreman.git",
-        "dependencies": [
-                { "name": "puppetlabs/stdlib", "version_requirement":">= 5.2.1 < 7.0.0" },
-                { "name": "puppetlabs/puppetserver_gem", "version_requirement":">= 1.1.1 < 2.0.0" }
-        ],
-        "operatingsystem_support": [
-                {
-                  "operatingsystem": "RedHat",
-                  "operatingsystemrelease": [
-                    "6",
-                    "7"
-                  ]
-                },
-                {
-                  "operatingsystem": "CentOS",
-                  "operatingsystemrelease": [
-                    "6",
-                    "7"
-                  ]
-                }
-        ],
-        "requirements": [
-          {
-            "name": "puppet",
-            "version_requirement": ">= 4.10.0 < 7.0.0"
-          }
-        ],
-        "description": "Attempt to automate The Foreman installation and initial configuration with Puppet"
+  "name": "efoft-foreman",
+  "version": "0.2.0",
+  "author": "efoft",
+  "license": "Apache-2.0",
+  "source": "https://github.com/efoft/puppet-foreman.git",
+  "dependencies": [
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 5.2.1 < 7.0.0"
+    },
+    {
+      "name": "puppetlabs/puppetserver_gem",
+      "version_requirement": ">= 1.1.1 < 2.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 4.10.0 < 7.0.0"
+    }
+  ],
+  "summary": "Attempt to automate The Foreman installation and initial configuration with Puppet"
 }

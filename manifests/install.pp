@@ -18,6 +18,7 @@ class foreman::install inherits foreman {
   $foreman_db_password = $foreman::foreman_db_password
 
   $override_options    = $foreman::override_options
+  $extra_packages      = $foreman::extra_packages
 
   $puppetdb_host_real = $puppetdb_host ?
   {
@@ -48,16 +49,31 @@ class foreman::install inherits foreman {
 
   $db_is_local = (($foreman_db_host == undef) or ($foreman_db_host == 'localhost') or ($foreman_db_host == '127.0.0.1'))
 
-  # Foreman installer packages
+  # Extra packages can be required for installer (e.g. epel-release)
   # ------------------------------------------------------------------------
-  $packages = $katello ?
-  {
-    true  => ['foreman-release-scl','katello'],
-    false => ['foreman-release-scl','foreman-installer'],
+  if ! empty($extra_packages) {
+    ensure_packages($extra_packages, { 'notify' => Exec['flush yum cache before foreman install'] })
   }
 
-  package { $packages:
-    ensure => installed,
+  # Flush yum cache before install begins
+  # ------------------------------------------------------------------------
+  exec { 'flush yum cache before foreman install':
+    command     => 'yum clean all',
+    path        => $::path,
+    refreshonly => true,
+  }
+
+  # Foreman installer packages
+  # ------------------------------------------------------------------------
+  $installer = $katello ?
+  {
+    true  => 'katello',
+    false => 'foreman-installer'
+  }
+
+  package { $installer:
+    ensure  => installed,
+    require => Exec['flush yum cache before foreman install'],
   }
 
   # PostreSQL version
@@ -73,7 +89,7 @@ class foreman::install inherits foreman {
     ## up-to-date PostgreSQL version. To use it by Foreman as well:
     $file_line_defaults = {
       path    => '/etc/foreman-installer/custom-hiera.yaml',
-      require => Package[$packages],
+      require => Package[$installer],
       before  => Exec['install foreman'],
     }
 
