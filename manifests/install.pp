@@ -47,7 +47,9 @@ class foreman::install inherits foreman {
     default => $foreman_db_port
   }
 
-  $db_is_local = (($foreman_db_host == undef) or ($foreman_db_host == 'localhost') or ($foreman_db_host == '127.0.0.1'))
+  ## We assume db host is installed separately only if foreman_db_host was not set.
+  ## Even it is set to localhost/127.0.0.1 this might meen e.g. remote db host is available via local haproxy.
+  $db_is_local = ($foreman_db_host == undef)
 
   # Extra packages can be required for installer (e.g. epel-release)
   # ------------------------------------------------------------------------
