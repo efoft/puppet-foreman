@@ -20,6 +20,16 @@ foreman::matrix:
       - epel-release
       - centos-release-scl-rh
     katello_release: '3.18'
+  '2.4':
+    extra_packages:
+      - epel-release
+      - centos-release-scl-rh
+    katello_release: '4.0'
+  '2.5':
+    extra_packages:
+      - epel-release
+      - centos-release-scl-rh
+    katello_release: '4.1'
   'latest':
     extra_packages:
       - epel-release
