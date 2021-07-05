@@ -16,6 +16,7 @@
 # @param eyaml               If to install and setup eyaml gem for sensitive data encryption.
 # @param vault               If to install hiera_vault module to be able to retrieve data from Hashicorp Vault.
 # @param manage_hosts_entry  If to add this host's FQDN into /etc/hosts if no DNS resolution is in place.
+# @param override_options    Any other options foreman-installer accepts (see foreman-installer --full-help).
 #
 # @note  Some params come from module's hiera data directory.
 # @note  Depending on the release number of The Foreman other params (like Katello release, repos etc) may vary.
