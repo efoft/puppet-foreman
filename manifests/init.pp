@@ -53,7 +53,6 @@ class foreman (
 
   $matrix = lookup('foreman::matrix', Hash, 'hash', {})[$release]
 
-  $puppet_release  = pick($matrix['puppet_release'], 6)
   $katello_release = pick($matrix['katello_release'], 'latest')
   $extra_packages  = pick($matrix['extra_packages'], [])
 
