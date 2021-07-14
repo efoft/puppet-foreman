@@ -34,7 +34,13 @@ class foreman::repos inherits foreman {
 
   # Katello
   if $katello {
-    $katello_rpm = "https://fedorapeople.org/groups/katello/releases/yum/${katello_release}/katello/el${facts['os']['release']['major']}/x86_64/katello-repos-latest.rpm"
+    ## Versions prior 3.17 are available on fedorapeople.org
+    ## Versions since 4.1 are no longer available on fedorapeople.org, only on yum.theforeman.org
+    $katello_rpm = ( versioncmp($katello_release,'3.17') >=0 ) ?
+    {
+      true  => "https://yum.theforeman.org/katello/${katello_release}/katello/el${facts['os']['release']['major']}/x86_64/katello-repos-latest.rpm",
+      false => "https://fedorapeople.org/groups/katello/releases/yum/${katello_release}/katello/el${facts['os']['release']['major']}/x86_64/katello-repos-latest.rpm"
+    }
 
     exec { 'yum install katello-repos':
       command => "yum -y --nogpgcheck install ${katello_rpm}",

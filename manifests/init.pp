@@ -1,13 +1,11 @@
 #
 # @param password            Initial admin password in Foreman GUI
-# @param puppet_release      Default: 6 comes from module's hiera
-# @param foreman_release     Default: 2.1 comes from module's hiera
+# @param release             The Foreman release e.g. '2.1', '2.2' etc
 # @param katello             If to use katello scenario for foreman-installer.
-# @param katello_release     Default: 3.15 comes from module's hiera
 # @param puppetdb            If to install PuppetDB integration. This doesn't install PuppetDB itself.
 # @param puppetdb_host       Specify if PuppetDB resides not on this host.
 # @param puppetdb_port       Specify if PuppetDB resides not on this host.
-# @param postgres_version    Version to be set in custom-install.yml of foreman-installer. But doen't manage PostreSQL repos!
+# @param postgres_version    Version to be set in custom-install.yml of foreman-installer. But doesn't manage PostreSQL repos!
 # @param foreman_db_host     Specify only if PostgreSQL db is on external host and not managed by this manifest.
 # @param foreman_db_port     Specify only if PostgreSQL db is on external host and not managed by this manifest.
 # @param foreman_db_database Specify only if PostgreSQL db is on external host and not managed by this manifest.
@@ -18,16 +16,17 @@
 # @param eyaml               If to install and setup eyaml gem for sensitive data encryption.
 # @param vault               If to install hiera_vault module to be able to retrieve data from Hashicorp Vault.
 # @param manage_hosts_entry  If to add this host's FQDN into /etc/hosts if no DNS resolution is in place.
+# @param override_options    Any other options foreman-installer accepts (see foreman-installer --full-help).
 #
 # @note  Some params come from module's hiera data directory.
+# @note  Depending on the release number of The Foreman other params (like Katello release, repos etc) may vary.
+#        All this is described in data/matrix.yaml and determined at compile time via hiera lookup.
 #
 class foreman (
   # Puppet & Foreman
   String                 $password,
-  String                 $puppet_release,
-  String                 $foreman_release,
+  String                 $release             = 'latest',
   # Katello
-  String                 $katello_release,
   Boolean                $katello             = true,
   # PuppetDB
   Boolean                $puppetdb            = true,
@@ -49,6 +48,16 @@ class foreman (
   Boolean                $manage_hosts_entry  = true,
   Array                  $override_options    = [],
 ) {
+
+  if versioncmp($release, '2.0') < 0 {
+    fail('minimal supported Foreman release is 2.0')
+  }
+
+  $matrix = lookup('foreman::matrix', Hash, 'hash', {})[$release]
+
+  $puppet_release  = pick($matrix['puppet_release'], 6)
+  $katello_release = pick($matrix['katello_release'], 'latest')
+  $extra_packages  = pick($matrix['extra_packages'], [])
 
   class { 'foreman::repos':   }
   -> class { 'foreman::prepare': }
