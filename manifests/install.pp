@@ -9,8 +9,6 @@ class foreman::install inherits foreman {
   $puppetdb_host       = $foreman::puppetdb_host
   $puppetdb_port       = $foreman::puppetdb_port
 
-  $postgres_version    = $foreman::postgres_version
-
   $foreman_db_host     = $foreman::foreman_db_host
   $foreman_db_port     = $foreman::foreman_db_port
   $foreman_db_database = $foreman::foreman_db_database
@@ -58,34 +56,6 @@ class foreman::install inherits foreman {
 
   package { $packages:
     ensure => installed,
-  }
-
-  # PostreSQL version
-  # ------------------------------------------------------------------------
-  if $db_is_local and defined(Class['puppetdb']) {
-
-    if $postgres_version != $puppetdb::postgres_version {
-      fail("\n\t if puppetdb is on the same host as foreman db then postgres_version must be set and equal to the one set for puppetdb \n")
-    }
-
-    ## Foreman tries to install PostreSQL from base OS repos while 
-    ## puppetlabs-puppetdb module sets up official repo and installs more 
-    ## up-to-date PostgreSQL version. To use it by Foreman as well:
-    $file_line_defaults = {
-      path    => '/etc/foreman-installer/custom-hiera.yaml',
-      require => Package[$packages],
-      before  => Exec['install foreman'],
-    }
-
-    file_line {
-      default: * => $file_line_defaults;
-      'postgresql version':
-        line  => "postgresql::globals::version: '${postgres_version}'",
-        match => '^postgresql::globals::version';
-      'postgresql bindir':
-        line  => "postgresql::globals::bindir: /usr/pgsql-${postgres_version}/bin",
-        match => '^postgresql::globals::bindir';
-    }
   }
 
   # Foreman installer options
