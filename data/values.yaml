@@ -1,6 +1,5 @@
 ---
-#foreman::password:        'password'
-foreman::puppet_release:  '6'
+#foreman::password:       'password'
 foreman::foreman_release: '2.1'
 
 foreman::katello: false
@@ -9,7 +8,6 @@ foreman::puppetdb: true
 #foreman::puppetdb_host: puppedb.example.com
 #foreman::puppetdb_port: 8081
 
-#foreman::postgres_version: '9.6'
 #foreman::foreman_db_host: dbhost.example.com
 #foreman::foreman_db_port: 5000
 #foreman::foreman_db_database: 'foreman'
