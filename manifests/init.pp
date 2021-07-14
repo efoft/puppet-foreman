@@ -10,6 +10,11 @@
 # @param foreman_db_database Specify only if PostgreSQL db is on external host and not managed by this manifest.
 # @param foreman_db_username Specify only if PostgreSQL db is on external host and not managed by this manifest.
 # @param foreman_db_password Specify only if PostgreSQL db is on external host and not managed by this manifest.
+# @param katello_db_host     Specify only if PostgreSQL db is on external host and not managed by this manifest.
+# @param katello_db_port     Specify only if PostgreSQL db is on external host and not managed by this manifest.
+# @param katello_db_database Specify only if PostgreSQL db is on external host and not managed by this manifest.
+# @param katello_db_username Specify only if PostgreSQL db is on external host and not managed by this manifest.
+# @param katello_db_password Specify only if PostgreSQL db is on external host and not managed by this manifest.
 # @param r10k                If to install r10k gem to manage control repo.
 # @param control_repo_url    The git URL of control repo (blank value leads to warning).
 # @param eyaml               If to install and setup eyaml gem for sensitive data encryption.
@@ -31,12 +36,18 @@ class foreman (
   Boolean                $puppetdb            = true,
   Optional[Stdlib::Host] $puppetdb_host       = undef,
   Optional[Stdlib::Port] $puppetdb_port       = undef,
-  # Database
+  # Foreman Database
   Optional[Stdlib::Host] $foreman_db_host     = undef,
   Optional[Stdlib::Port] $foreman_db_port     = undef,
   Optional[String[1]]    $foreman_db_database = undef,
   Optional[String[1]]    $foreman_db_username = undef,
   Optional[String[1]]    $foreman_db_password = undef,
+  # Katello Database
+  Optional[Stdlib::Host] $katello_db_host     = undef,
+  Optional[Stdlib::Port] $katello_db_port     = undef,
+  Optional[String[1]]    $katello_db_database = undef,
+  Optional[String[1]]    $katello_db_username = undef,
+  Optional[String[1]]    $katello_db_password = undef,
   # Gems
   Boolean                $r10k                = true,
   String                 $control_repo_url    = '',
