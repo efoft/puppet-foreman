@@ -1,6 +1,6 @@
 #
 # @param password            Initial admin password in Foreman GUI
-# @param release             The Foreman release e.g. '2.1', '2.2' etc
+# @param release             The Foreman release e.g. '2.2', '2.3' etc. Minimal supported release is 2.2.
 # @param katello             If to use katello scenario for foreman-installer.
 # @param puppetdb            If to install PuppetDB integration. This doesn't install PuppetDB itself.
 # @param puppetdb_host       Specify if PuppetDB resides not on this host.
