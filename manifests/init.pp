@@ -58,14 +58,15 @@ class foreman (
   Array                  $override_options    = [],
 ) {
 
-  if versioncmp($release, '2.0') < 0 {
-    fail('minimal supported Foreman release is 2.0')
+  if versioncmp($release, '2.2') < 0 {
+    fail('minimal supported Foreman release is 2.2')
   }
 
   $matrix = lookup('foreman::matrix', Hash, 'hash', {})[$release]
 
-  $katello_release = pick($matrix['katello_release'], 'latest')
-  $extra_packages  = pick($matrix['extra_packages'], [])
+  $additional_repos = pick($matrix['additional_repos'], [])
+  $katello_release  = pick($matrix['katello_release'], 'latest')
+  $katello_packages = pick($matrix['katello_packages'], [])
 
   class { 'foreman::repos':   }
   -> class { 'foreman::prepare': }

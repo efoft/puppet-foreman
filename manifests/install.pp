@@ -2,26 +2,23 @@
 class foreman::install inherits foreman {
 
   $password            = $foreman::password
-
   $katello             = $foreman::katello
-
   $puppetdb            = $foreman::puppetdb
   $puppetdb_host       = $foreman::puppetdb_host
   $puppetdb_port       = $foreman::puppetdb_port
-
   $foreman_db_host     = $foreman::foreman_db_host
   $foreman_db_port     = $foreman::foreman_db_port
   $foreman_db_database = $foreman::foreman_db_database
   $foreman_db_username = $foreman::foreman_db_username
   $foreman_db_password = $foreman::foreman_db_password
-
   $katello_db_host     = $foreman::katello_db_host
   $katello_db_port     = $foreman::katello_db_port
   $katello_db_database = $foreman::katello_db_database
   $katello_db_username = $foreman::katello_db_username
   $katello_db_password = $foreman::katello_db_password
-
   $override_options    = $foreman::override_options
+
+  $katello_packages    = $foreman::katello_packages
 
   $puppetdb_host_real = $puppetdb_host ?
   {
@@ -59,15 +56,15 @@ class foreman::install inherits foreman {
   ## Even it is set to localhost/127.0.0.1 this might mean e.g. remote db host is available via local haproxy.
   $db_is_local = ($foreman_db_host == undef)
 
-  # Foreman installer packages
+  # Installer packages
   # ------------------------------------------------------------------------
-  $packages = $katello ?
+  $installer = $katello ?
   {
-    true  => ['foreman-release-scl','katello'],
-    false => ['foreman-release-scl','foreman-installer'],
+    true  => $katello_packages,
+    false => 'foreman-installer',
   }
 
-  package { $packages:
+  package { $installer:
     ensure => installed,
   }
 
@@ -132,6 +129,7 @@ class foreman::install inherits foreman {
     provider    => 'shell',
     timeout     => 0,
     unless      => "grep ${foreman_installer_md5} /etc/foreman-installer/.foreman-installer.status",
+    require     => Package[$installer],
   }
 
   ~> exec { 'set foreman-installer status':
