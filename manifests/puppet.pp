@@ -45,6 +45,7 @@ class foreman::puppet inherits foreman{
     file { '/etc/puppetlabs/r10k/r10k.yaml':
       ensure  => file,
       content => template('foreman/r10k.yaml.erb'),
+      replace => false,
     }
 
     if empty($control_repo_url) {
