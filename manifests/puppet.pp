@@ -11,7 +11,7 @@ class foreman::puppet inherits foreman{
 
   # Puppetserver
   # -----------------------------------------------------------------------
-  package { ['puppetserver','puppet-agent','puppet-bolt']:
+  package { 'puppetserver':
     ensure => installed,
   }
 
